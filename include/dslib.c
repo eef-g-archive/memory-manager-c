@@ -71,7 +71,6 @@ void* Node_getValue(Nodeptr self)
 // Changes the data stored in self->val and also updates the self->size value
 void Node_setValue(Nodeptr self, void* val)
 {
-    
     // RN no wayh to set size for pointers`
     self->val = val;
     self->size = sizeof(val);
@@ -150,6 +149,7 @@ void Node_printNode(Nodeptr self)
     {
         printf("NULL\n");
     }
+    printf("| Node size: %d\n", self->size);
     printf("~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
 }
 
@@ -286,6 +286,23 @@ void List_printList(Listptr self)
     {
         printf("List is empty\n");
     }
+}
+
+void List_printNodes(Listptr self)
+{
+    printf("##############\nList is %d nodes long\n", self->len);
+    if(self->len == 0)
+    {
+        return;
+    }
+
+    Nodeptr curr = self->head;
+    while(curr != NULL)
+    {
+        Node_printNode(curr);
+        curr = curr->next;
+    }
+    printf("##############\n\n");
 }
 
 

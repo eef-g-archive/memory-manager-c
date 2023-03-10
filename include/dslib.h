@@ -56,6 +56,7 @@ Listptr List_new();
 void List_init(Listptr l);
 void List_addValue(Listptr self, void* val, dataType type);
 void List_printList(Listptr self);
+void List_printNodes(Listptr self);
 Nodeptr List_walkToIndex(Listptr self, int index);
 Nodeptr List_findNodebyValue(Listptr self, void* val);
 void List_insertBefore(Listptr self, int index, void* val, dataType type);
