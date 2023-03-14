@@ -9,10 +9,10 @@
 
 
 
-Managerptr Manager_new(int size)
+Managerptr Manager_new(int size, fitType mode)
 {
     Managerptr returnedPointer = (Managerptr)malloc(sizeof(Manager));
-    Manager_init(returnedPointer, size);
+    Manager_init(returnedPointer, size, mode);
     
     // Have to initialize the list in THIS function
     // If initialized in the Manager_init function, the value of the first node breaks, idk why
@@ -22,8 +22,9 @@ Managerptr Manager_new(int size)
     return returnedPointer;
 }
 
-void Manager_init(Managerptr self, int size)
+void Manager_init(Managerptr self, int size, fitType mode)
 {
+    self->mode = mode;
     self->busy_list = List_new();
     self->free_list = List_new();
     self->total_size = size;
@@ -41,22 +42,42 @@ void Manager_allocate(Managerptr self, int size)
             (i.e. At the beginning, val=0, then next allocation, val=free_list->head->val)
         2. Make sure that the node's size = process size
     */
+   switch(self->mode)
+   {
+        case FIRST:
+        {
+            FirstFitAlloc(self, size);
+            break;
+        }
+        case BEST:
+        {
+            FirstFitAlloc(self, size);
+            break;
+        }
+        default:
+        {
+            break;
+        }
+   }
+    // Debug Stuff -- Will delete later
+    Manager_printLists(self);
+}
 
-    // At the moment, only using first fit
-    int available_size = self->free_list->tail->size - size; // We'll use this later
+void FirstFitAlloc(Managerptr self, int size)
+{
+    int available_size = self->free_list->tail->size - size;
     int insert_slot = self->free_list->tail->val;
 
     List_addValue(self->busy_list, insert_slot, INT);
     self->busy_list->tail->size = size;
- 
+
     int new_address = insert_slot + size;
 
     self->free_list->tail->size -= size;
-    self->free_list->tail->val = new_address;
 
-    // Debug Stuff -- Will delete later
-    Manager_printLists(self);
+    self->free_list->tail->val = new_address;
 }
+
 
 void Manager_printLists(Managerptr self)
 {
@@ -76,9 +97,6 @@ void Manager_destroy(Managerptr self)
         free(self);
     }
 }
-
-
-
 
 
 // Functions for debugging
