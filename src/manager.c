@@ -8,6 +8,11 @@
 */
 
 
+/*********************/
+/*     CONSTRUCTOR   */
+/*      FUNCTIONS    */
+/*********************/
+
 
 Managerptr Manager_new(int size, fitType mode)
 {
@@ -31,6 +36,12 @@ void Manager_init(Managerptr self, int size, fitType mode)
 }
 
 
+/*********************/
+/*     ALLOCATION    */
+/*      FUNCTIONS    */
+/*********************/
+
+
 void Manager_allocate(Managerptr self, int size)
 {
 
@@ -46,37 +57,95 @@ void Manager_allocate(Managerptr self, int size)
    {
         case FIRST:
         {
-            FirstFitAlloc(self, size);
+            _FirstFitAlloc(self, size);
             break;
         }
         case BEST:
         {
-            FirstFitAlloc(self, size);
+            _BestFitAlloc(self, size);
             break;
         }
         default:
         {
             break;
         }
+
+        // Sort the two lists by value to arrange them by the fake memory addresses
+        List_valueSort(self->free_list);
+        List_valueSort(self->busy_list);
    }
+   // TODO: Automatically Coallesce the data after allocation (We want the free list to be as little as possible)
+
     // Debug Stuff -- Will delete later
     Manager_printLists(self);
 }
 
-void FirstFitAlloc(Managerptr self, int size)
+void _FirstFitAlloc(Managerptr self, int size)
 {
-    int available_size = self->free_list->tail->size - size;
-    int insert_slot = self->free_list->tail->val;
+    int insert_slot, new_address;
+
+    Nodeptr curr = self->free_list->head;
+    while(curr != NULL)
+    {
+        if(size < curr->size)
+        {
+            break;
+        }
+        curr = curr->next;
+    }
+
+    if(size < curr->size)
+    {
+        insert_slot = curr->val;
+
+        List_addValue(self->busy_list, insert_slot, INT);
+        self->busy_list->tail->size = size;
+
+        new_address = insert_slot + size;
+        curr->size -= size;
+        curr->val = new_address;
+    }
+    else
+    {
+        printf("No free block large enough for task of size %d", size);
+        return;
+    }
+}
+
+void _BestFitAlloc(Managerptr self, int size)
+{
+    int insert_slot, new_address, block_location;
+    int min_diff = self->free_list->head->size;
+
+    Nodeptr curr = self->free_list->head;
+    int i = 0;
+    block_location = i;    
+    while(curr != NULL)
+    {
+        if(curr->size < min_diff)
+        {
+            min_diff = curr->size;
+            block_location = i;
+        }
+        i++;
+        curr = curr->next;
+    }
+
+    curr = List_walkToIndex(self->free_list, block_location);
+    insert_slot = curr->val;
 
     List_addValue(self->busy_list, insert_slot, INT);
     self->busy_list->tail->size = size;
-
-    int new_address = insert_slot + size;
-
-    self->free_list->tail->size -= size;
-
-    self->free_list->tail->val = new_address;
+    new_address = insert_slot + size;
+    curr->size -= size;
+    curr->val = new_address;
 }
+
+
+/*********************/
+/*  OUTPUT & DESTROY */
+/*     FUNCTIONS     */
+/*********************/
 
 
 void Manager_printLists(Managerptr self)
@@ -99,7 +168,12 @@ void Manager_destroy(Managerptr self)
 }
 
 
-// Functions for debugging
+/*********************/
+/*       DEBUG       */
+/*      FUNCTIONS    */
+/*********************/
+
+
 void _print_List(Listptr self)
 {
     if(self->len == 0)
