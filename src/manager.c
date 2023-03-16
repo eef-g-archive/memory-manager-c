@@ -80,6 +80,41 @@ void Manager_allocate(Managerptr self, int size)
     Manager_printLists(self);
 }
 
+void Manager_free(Managerptr self, int address)
+{
+    printf("Freeing\n");
+    Nodeptr freed_block = NULL;
+    Nodeptr curr = self->busy_list->head;
+    int index = 0;
+    while(curr != NULL)
+    {
+        printf("Stepping thru loop\n");
+        if(curr->val == address)
+        {
+            printf("Found the correct address\n");
+            freed_block = curr;
+            break;
+        }
+        curr = curr->next;
+        index ++;
+    }
+
+    if(freed_block == NULL) { return; }
+    printf("Making new node\n");
+    int new_value = freed_block->val;
+    printf("Adding new node\n");
+    List_addValue(self->free_list, new_value, INT);
+    self->free_list->tail->size = freed_block->size;
+    printf("Removing old node\n");
+    List_removeAt(self->busy_list, index);
+    printf("Sorting lists\n");
+    List_valueSort(self->free_list);
+    List_valueSort(self->busy_list);
+
+    // Debug Stuff -- Will delete later
+    Manager_printLists(self);
+}
+
 void _FirstFitAlloc(Managerptr self, int size)
 {
     int insert_slot, new_address;
@@ -156,7 +191,6 @@ void Manager_printLists(Managerptr self)
     _print_List(self->busy_list);
 }
 
-
 void Manager_destroy(Managerptr self)
 {
     if(self)
@@ -193,11 +227,11 @@ void _print_List(Listptr self)
 void _custom_Node_Print(Nodeptr self)
 {
         printf("~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
-        printf("| Node with value: %d\n", self->val);
+        printf("| Block with address: %d\n", self->val);
         printf("| Next pointer: ");
         if(self->next != NULL)
         {
-            printf("Node with value [%d]\n", self->next->val);
+            printf("Block with address [%d]\n", self->next->val);
         }
         else
         {
@@ -207,12 +241,12 @@ void _custom_Node_Print(Nodeptr self)
         printf("| Prev pointer: ");
         if(self->prev != NULL)
         {
-            printf("Node with value [%d]\n", self->prev->val);
+            printf("Block with address [%d]\n", self->prev->val);
         }
         else
         {
             printf("NULL\n");
         }
-        printf("| Node size: %d\n", self->size);
+        printf("| Block size: %d\n", self->size);
         printf("~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
 }
