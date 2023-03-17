@@ -451,8 +451,11 @@ Nodeptr List_unlinkNodebyValue(Listptr self, void* val)
 void _shuffle(Listptr self, int firstIndex, int secondIndex)
 {
     void* temporaryValueHolder = List_walkToIndex(self, firstIndex)->val;
+    int temporarySizeHolder = List_walkToIndex(self, firstIndex)->size;
     List_walkToIndex(self, firstIndex)->val = List_walkToIndex(self, secondIndex)->val;
+    List_walkToIndex(self, firstIndex)->size = List_walkToIndex(self, secondIndex)->size;
     List_walkToIndex(self, secondIndex)->val = temporaryValueHolder;
+    List_walkToIndex(self, secondIndex)->size = temporarySizeHolder;
 }
 
 // Sorts the given Linked List by the values it stores.
@@ -469,7 +472,7 @@ void List_valueSort(Listptr self)
             sort_index = i;
             for(int j = i; j < self->len; j++)
             {
-                if(Node_getValue(List_walkToIndex(self, j)) < Node_getValue(List_walkToIndex(self, i)))
+                if(List_walkToIndex(self, j)->val < List_walkToIndex(self, i)->val)
                 {
                     sort_index = j;
                 }
@@ -478,14 +481,14 @@ void List_valueSort(Listptr self)
         }
 
         // Need this last if-statement to error check for the shortcoming of the for-loop
-        if(Node_getValue(self->head) > Node_getValue(self->head->next))
+        if(self->head->val > self->head->next->val)
         {
             _shuffle(self, 0, 1);
         }
 
         for(int i = 0; i < self->len - 1; i++)
         {
-            if(Node_getValue(List_walkToIndex(self, i)) > Node_getValue(List_walkToIndex(self, i + 1)))
+            if(List_walkToIndex(self, i)->val > List_walkToIndex(self, i + 1)->val)
             {
                 sortedCheck = 0;
                 break;

@@ -8,4 +8,5 @@ int main()
     Manager_allocate(test_man, 10);
     Manager_allocate(test_man, 4000);
     Manager_free(test_man, 1000);
+    Manager_allocate(test_man, 50);
 }
