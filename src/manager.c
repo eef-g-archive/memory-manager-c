@@ -82,16 +82,14 @@ void Manager_allocate(Managerptr self, int size)
 
 void Manager_free(Managerptr self, int address)
 {
-    printf("Freeing\n");
+    printf("\n\n~~~~~~~~~~\nFreeing\n~~~~~~~~~~\n");
     Nodeptr freed_block = NULL;
     Nodeptr curr = self->busy_list->head;
     int index = 0;
     while(curr != NULL)
     {
-        printf("Stepping thru loop\n");
         if(curr->val == address)
         {
-            printf("Found the correct address\n");
             freed_block = curr;
             break;
         }
@@ -100,14 +98,10 @@ void Manager_free(Managerptr self, int address)
     }
 
     if(freed_block == NULL) { return; }
-    printf("Making new node\n");
     int new_value = freed_block->val;
-    printf("Adding new node\n");
     List_addValue(self->free_list, new_value, INT);
     self->free_list->tail->size = freed_block->size;
-    printf("Removing old node\n");
     List_removeAt(self->busy_list, index);
-    printf("Sorting lists\n");
     List_valueSort(self->free_list);
     List_valueSort(self->busy_list);
 
@@ -120,25 +114,34 @@ void _FirstFitAlloc(Managerptr self, int size)
     int insert_slot, new_address;
 
     Nodeptr curr = self->free_list->head;
+    int index = 0;
     while(curr != NULL)
     {
-        if(size < curr->size)
+        if(size <= curr->size)
         {
             break;
         }
         curr = curr->next;
+        index++;
     }
 
-    if(size < curr->size)
+    if(size <= curr->size)
     {
         insert_slot = curr->val;
 
         List_addValue(self->busy_list, insert_slot, INT);
         self->busy_list->tail->size = size;
 
-        new_address = insert_slot + size;
-        curr->size -= size;
-        curr->val = new_address;
+        if (size == curr->size)
+        {
+            List_removeAt(self->free_list, index);
+        }
+        else
+        {
+            new_address = insert_slot + size;
+            curr->size -= size;
+            curr->val = new_address;   
+        }
     }
     else
     {
@@ -150,14 +153,14 @@ void _FirstFitAlloc(Managerptr self, int size)
 void _BestFitAlloc(Managerptr self, int size)
 {
     int insert_slot, new_address, block_location;
-    int min_diff = self->free_list->head->size;
+    int min_diff = self->total_size;
 
     Nodeptr curr = self->free_list->head;
     int i = 0;
     block_location = i;    
     while(curr != NULL)
     {
-        if(curr->size < min_diff)
+        if((curr->size < min_diff) & (curr->size >= size))
         {
             min_diff = curr->size;
             block_location = i;
@@ -171,9 +174,16 @@ void _BestFitAlloc(Managerptr self, int size)
 
     List_addValue(self->busy_list, insert_slot, INT);
     self->busy_list->tail->size = size;
-    new_address = insert_slot + size;
-    curr->size -= size;
-    curr->val = new_address;
+    if(curr->size - size == 0)
+    {
+        List_removeAt(self->free_list, block_location);   
+    }
+    else
+    {
+        new_address = insert_slot + size;
+        curr->size -= size;
+        curr->val = new_address;   
+    }
 }
 
 
