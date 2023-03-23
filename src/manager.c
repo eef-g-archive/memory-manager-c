@@ -74,8 +74,6 @@ void Manager_allocate(Managerptr self, int size)
         List_valueSort(self->free_list);
         List_valueSort(self->busy_list);
    }
-   // TODO: Automatically Coallesce the data after allocation (We want the free list to be as little as possible)
-
     // Debug Stuff -- Will delete later
     Manager_printLists(self);
 }
@@ -104,6 +102,9 @@ void Manager_free(Managerptr self, int address)
     List_removeAt(self->busy_list, index);
     List_valueSort(self->free_list);
     List_valueSort(self->busy_list);
+
+    // TODO: Coalesce Memory Here
+    Manager_coalesce(self);
 
     // Debug Stuff -- Will delete later
     Manager_printLists(self);
@@ -184,6 +185,23 @@ void _BestFitAlloc(Managerptr self, int size)
         curr->size -= size;
         curr->val = new_address;   
     }
+}
+
+
+
+void Manager_coalesce(Managerptr self)
+{
+    // How to coalesce:
+    /*
+        1. Check the free list and use the earliest address to be the new beginning section for the free list
+        2. Combine the free list to be a single node with a large size
+        3. Shift the remaining items in the busy list to be offset by size of node shifted if they're affected by movement
+        (i.e. We have two free list nodes @ address 0 & 3000 as well as a bust list node from 1000-1500. We want to move the free list node
+        from address 3000 to 1000 to combine the free list. We move it, but then offset the busy node from 1000-1500 to begin at the end of the
+        new free list)
+    */
+
+
 }
 
 
