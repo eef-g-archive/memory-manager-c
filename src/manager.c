@@ -193,12 +193,12 @@ void Manager_coalesce(Managerptr self)
 {
     // How to coalesce:
     /*
-        1. Check the free list and use the earliest address to be the new beginning section for the free list
-        2. Combine the free list to be a single node with a large size
-        3. Shift the remaining items in the busy list to be offset by size of node shifted if they're affected by movement
-        (i.e. We have two free list nodes @ address 0 & 3000 as well as a bust list node from 1000-1500. We want to move the free list node
-        from address 3000 to 1000 to combine the free list. We move it, but then offset the busy node from 1000-1500 to begin at the end of the
-        new free list)
+        1. Check to see if there are multiple free blocks next to eachother, and smush them together
+        2. Only smush blocks next to eachother until you hit a busy block. Once you hit a busy block, then you cannot smush any further!
+        3. So, check each free block and see if they start right after the current block and then combine them. If there is a gap between blocks, ignore coalescing.
+        (i.e. We have five free list nodes with addresses from 0-150, 150-2000, 2000-2500, 4000-4040, 4050-5000 as well as busy list nodes from 2500-4000 and 4040-4050.
+        We want to combine the first 3 free blocks to make a new free block from 0-2500, but cannot combine the new large block with either of the 2 remaining free blocks.
+        This is because we hit a busy block and there are no free blocks right next to eachother.)
     */
 
 
