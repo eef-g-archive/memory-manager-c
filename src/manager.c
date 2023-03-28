@@ -200,6 +200,24 @@ void Manager_coalesce(Managerptr self)
         We want to combine the first 3 free blocks to make a new free block from 0-2500, but cannot combine the new large block with either of the 2 remaining free blocks.
         This is because we hit a busy block and there are no free blocks right next to eachother.)
     */
+   //Goal is to make a loop that cycles through the manager until it hits a block thats being used
+    // make a list and push start and end index to it? then when re organizing, you can use the numbers for the addition/subtraction
+   Listptr curr = self->free_list->head;
+    while(curr < self->free_list->len)
+    {
+        //get block length, start, finish
+        int size curr->size;
+        printf(curr->len); //test to print free list
+
+        //next block
+        curr = curr->next; // not sure why this doesnt work, considering the free list is a listptr
+    }
+    //while loop breaks, end of free list
+    if(curr->head->size)
+    {
+
+    }
+
 
 
 }
