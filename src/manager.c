@@ -88,6 +88,7 @@ void Manager_free(Managerptr self, int address)
     {
         if(curr->val == address)
         {
+            printf("Found the block to free\n");
             freed_block = curr;
             break;
         }
@@ -95,15 +96,16 @@ void Manager_free(Managerptr self, int address)
         index ++;
     }
 
+
     if(freed_block == NULL) { return; }
     int new_value = freed_block->val;
     List_addValue(self->free_list, new_value, INT);
     self->free_list->tail->size = freed_block->size;
     List_removeAt(self->busy_list, index);
     List_valueSort(self->free_list);
+    // This breaks if there are 2 or less items in the busy list
     List_valueSort(self->busy_list);
 
-    // TODO: Coalesce Memory Here
     Manager_coalesce(self);
 
     // Debug Stuff -- Will delete later
@@ -202,23 +204,44 @@ void Manager_coalesce(Managerptr self)
     */
    //Goal is to make a loop that cycles through the manager until it hits a block thats being used
     // make a list and push start and end index to it? then when re organizing, you can use the numbers for the addition/subtraction
-   Listptr curr = self->free_list->head;
-    while(curr < self->free_list->len)
+    Nodeptr curr = self->free_list->head;
+    int prev_size = curr->size;
+    int prev_address = curr->val;
+    int curr_size = curr->size;
+    int i = 0;
+    int is_combined = 0; // Treat this like a bool, please
+
+    while(is_combined == 0)
     {
-        //get block length, start, finish
-        int size curr->size;
-        printf(curr->len); //test to print free list
+        // Reset to be at the beginning
+        i = 0;
+        curr = self->free_list->head;
+        prev_size = curr->size;
+        prev_address = curr->val;
 
-        //next block
-        curr = curr->next; // not sure why this doesnt work, considering the free list is a listptr
+        while(i < self->free_list->len)
+        {
+            //get block length, start, finish
+            if(prev_address + prev_size == curr->val)
+            {
+                printf("New starting address: %d\nNew node size: %d\nCurrent index: %d",prev_address, prev_size + curr->size, i);
+                curr_size = curr->size;
+                List_removeAt(self->free_list, i - 1);
+                List_addValue(self->free_list, prev_address, INT);
+                self->free_list->tail->size = prev_size + curr_size;
+                List_valueSort(self->free_list);
+                // Flag for combination
+                break;
+            }
+            //next block
+            i++;
+            curr = curr->next; // not sure why this doesnt work, considering the free list is a listptr
+            if(curr == NULL)
+            {
+                is_combined = 1;
+            }
+        }
     }
-    //while loop breaks, end of free list
-    if(curr->head->size)
-    {
-
-    }
-
-
 
 }
 
