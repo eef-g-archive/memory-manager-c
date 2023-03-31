@@ -13,3 +13,5 @@
 
 # Ignore all the builds of the program
 *.exe
+
+.vscode
