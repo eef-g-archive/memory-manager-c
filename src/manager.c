@@ -13,7 +13,9 @@
 /*      FUNCTIONS    */
 /*********************/
 
-
+// Function to create a new manager object
+// size: the total amount of memory to manage
+// mode: the fit mode to use (first fit or best fit)
 Managerptr Manager_new(int size, fitType mode)
 {
     Managerptr returnedPointer = (Managerptr)malloc(sizeof(Manager));
@@ -27,6 +29,10 @@ Managerptr Manager_new(int size, fitType mode)
     return returnedPointer;
 }
 
+// Function to initialize a manager object
+// self: the manager object to initialize
+// size: the total amount of memory to manage
+// mode: the fit mode to use (first fit or best fit)
 void Manager_init(Managerptr self, int size, fitType mode)
 {
     self->mode = mode;
@@ -36,12 +42,16 @@ void Manager_init(Managerptr self, int size, fitType mode)
 }
 
 
+
 /*********************/
 /*     ALLOCATION    */
 /*      FUNCTIONS    */
 /*********************/
 
 
+// Function to allocate a new block of memory
+// self: the manager object to use
+// size: the size of the block to allocate
 void Manager_allocate(Managerptr self, int size)
 {
 
@@ -78,6 +88,9 @@ void Manager_allocate(Managerptr self, int size)
     Manager_printLists(self);
 }
 
+// Function to free a task from memory
+// self: the manager object to use
+// address: the address of the block to free
 void Manager_free(Managerptr self, int address)
 {
     printf("\n\n~~~~~~~~~~\nFreeing\n~~~~~~~~~~\n");
@@ -112,6 +125,9 @@ void Manager_free(Managerptr self, int address)
     Manager_printLists(self);
 }
 
+// Function to allocate a new block of memory using first fit
+// self: the manager object to use
+// size: the size of the block to allocate
 void _FirstFitAlloc(Managerptr self, int size)
 {
     int insert_slot, new_address;
@@ -153,6 +169,9 @@ void _FirstFitAlloc(Managerptr self, int size)
     }
 }
 
+// Function to allocate a new block of memory using best fit
+// self: the manager object to use
+// size: the size of the block to allocate
 void _BestFitAlloc(Managerptr self, int size)
 {
     int insert_slot, new_address, block_location;
@@ -190,61 +209,84 @@ void _BestFitAlloc(Managerptr self, int size)
 }
 
 
-
+// Function to coalesce free blocks of memory
+// self: the manager object to use
 void Manager_coalesce(Managerptr self)
 {
-    // How to coalesce:
-    /*
-        1. Check to see if there are multiple free blocks next to eachother, and smush them together
-        2. Only smush blocks next to eachother until you hit a busy block. Once you hit a busy block, then you cannot smush any further!
-        3. So, check each free block and see if they start right after the current block and then combine them. If there is a gap between blocks, ignore coalescing.
-        (i.e. We have five free list nodes with addresses from 0-150, 150-2000, 2000-2500, 4000-4040, 4050-5000 as well as busy list nodes from 2500-4000 and 4040-4050.
-        We want to combine the first 3 free blocks to make a new free block from 0-2500, but cannot combine the new large block with either of the 2 remaining free blocks.
-        This is because we hit a busy block and there are no free blocks right next to eachother.)
-    */
-   //Goal is to make a loop that cycles through the manager until it hits a block thats being used
-    // make a list and push start and end index to it? then when re organizing, you can use the numbers for the addition/subtraction
     Nodeptr curr = self->free_list->head;
-    int prev_size = curr->size;
-    int prev_address = curr->val;
-    int curr_size = curr->size;
-    int i = 0;
-    int is_combined = 0; // Treat this like a bool, please
-
-    while(is_combined == 0)
+    Nodeptr next = curr->next;
+    int index = 0;
+    while(next != NULL)
     {
-        // Reset to be at the beginning
-        i = 0;
-        curr = self->free_list->head;
-        prev_size = curr->size;
-        prev_address = curr->val;
-
-        while(i < self->free_list->len)
+        if(curr->val + curr->size == next->val)
         {
-            //get block length, start, finish
-            if(prev_address + prev_size == curr->val)
-            {
-                printf("New starting address: %d\nNew node size: %d\nCurrent index: %d",prev_address, prev_size + curr->size, i);
-                curr_size = curr->size;
-                List_removeAt(self->free_list, i - 1);
-                List_addValue(self->free_list, prev_address, INT);
-                self->free_list->tail->size = prev_size + curr_size;
-                List_valueSort(self->free_list);
-                // Flag for combination
-                break;
-            }
-            //next block
-            i++;
-            curr = curr->next; // not sure why this doesnt work, considering the free list is a listptr
-            if(curr == NULL)
-            {
-                is_combined = 1;
-            }
+            curr->size += next->size;
+            List_removeAt(self->free_list, index+1);
+            next = curr->next;
         }
+        else
+        {
+            curr = next;
+            next = curr->next;
+        }
+        index++;
     }
-
 }
 
+
+// void Manager_coalesce(Managerptr self)
+// {
+//     // How to coalesce:
+//     /*
+//         1. Check to see if there are multiple free blocks next to eachother, and smush them together
+//         2. Only smush blocks next to eachother until you hit a busy block. Once you hit a busy block, then you cannot smush any further!
+//         3. So, check each free block and see if they start right after the current block and then combine them. If there is a gap between blocks, ignore coalescing.
+//         (i.e. We have five free list nodes with addresses from 0-150, 150-2000, 2000-2500, 4000-4040, 4050-5000 as well as busy list nodes from 2500-4000 and 4040-4050.
+//         We want to combine the first 3 free blocks to make a new free block from 0-2500, but cannot combine the new large block with either of the 2 remaining free blocks.
+//         This is because we hit a busy block and there are no free blocks right next to eachother.)
+//     */
+//    //Goal is to make a loop that cycles through the manager until it hits a block thats being used
+//     // make a list and push start and end index to it? then when re organizing, you can use the numbers for the addition/subtraction
+//     Nodeptr curr = self->free_list->head;
+//     int prev_size = curr->size;
+//     int prev_address = curr->val;
+//     int curr_size = curr->size;
+//     int i = 0;
+//     int is_combined = 0; // Treat this like a bool, please
+
+//     while(is_combined == 0)
+//     {
+//         // Reset to be at the beginning
+//         i = 0;
+//         curr = self->free_list->head;
+//         prev_size = curr->size;
+//         prev_address = curr->val;
+
+//         while(i < self->free_list->len)
+//         {
+//             //get block length, start, finish
+//             if(prev_address + prev_size == curr->val)
+//             {
+//                 printf("New starting address: %d\nNew node size: %d\nCurrent index: %d",prev_address, prev_size + curr->size, i);
+//                 curr_size = curr->size;
+//                 List_removeAt(self->free_list, i - 1);
+//                 List_addValue(self->free_list, prev_address, INT);
+//                 self->free_list->tail->size = prev_size + curr_size;
+//                 List_valueSort(self->free_list);
+//                 // Flag for combination
+//                 break;
+//             }
+//             //next block
+//             i++;
+//             curr = curr->next; // not sure why this doesnt work, considering the free list is a listptr
+//             if(curr == NULL)
+//             {
+//                 is_combined = 1;
+//             }
+//         }
+//     }
+
+// }
 
 /*********************/
 /*  OUTPUT & DESTROY */
@@ -252,6 +294,8 @@ void Manager_coalesce(Managerptr self)
 /*********************/
 
 
+// Function to print the free and busy lists
+// self: the manager object to use
 void Manager_printLists(Managerptr self)
 {
     printf("##############\nFree List -- Length: %d\n", self->free_list->len);
@@ -260,6 +304,8 @@ void Manager_printLists(Managerptr self)
     _print_List(self->busy_list);
 }
 
+// Function to destroy the manager object
+// self: the manager object to destroy
 void Manager_destroy(Managerptr self)
 {
     if(self)
@@ -277,6 +323,8 @@ void Manager_destroy(Managerptr self)
 /*********************/
 
 
+// Function to print the contents of a list
+// self: the list to print
 void _print_List(Listptr self)
 {
     if(self->len == 0)
@@ -293,6 +341,8 @@ void _print_List(Listptr self)
     printf("##############\n\n");
 }
 
+// Function to print the contents of a node
+// self: the node to print
 void _custom_Node_Print(Nodeptr self)
 {
         printf("~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");

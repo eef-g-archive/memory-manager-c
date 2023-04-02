@@ -496,7 +496,8 @@ void List_valueSort(Listptr self)
         }
         if(sortedCheck != 1)
         {
-            sortedCheck = 1;   
+            sortedCheck = 1;
+            printf("Not sorted yet!\n");
         }
         else
         {
@@ -505,7 +506,6 @@ void List_valueSort(Listptr self)
         }
 
     }
-
 }
 
 // Sorts the given Linked List by the memory addresses of the values within it.
