@@ -1,6 +1,10 @@
 #include <stdio.h>
 #include "../headers/manager.h"
 
+// Custsom Function Declarations
+
+
+
 /*********************/
 /*     CONSTRUCTOR   */
 /*      FUNCTIONS    */
@@ -249,9 +253,9 @@ void Manager_coalesce(Managerptr self)
 void Manager_printLists(Managerptr self)
 {
     printf("##############\nFree List -- Length: %d\n", self->free_list->len);
-    _print_List(self->free_list);
+    _print_list(self->free_list);
     printf("##############\nBusy List -- Length: %d\n", self->busy_list->len);
-    _print_List(self->busy_list);
+    _print_list(self->busy_list);
 }
 
 // Function to destroy the manager object
@@ -275,7 +279,7 @@ void Manager_destroy(Managerptr self)
 
 // Function to print the contents of a list
 // self: the list to print
-void _print_List(Listptr self)
+void _print_list(Listptr self)
 {
     if(self->len == 0)
     {

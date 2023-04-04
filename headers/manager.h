@@ -19,3 +19,7 @@ void Manager_free(Managerptr self, int address);
 void Manager_coalesce(Managerptr self);
 void Manager_printLists(Managerptr self);
 void Manager_destroy(Managerptr self);
+void _print_list(Listptr self);
+void _custom_Node_Print(Nodeptr self);
+void _FirstFitAlloc(Managerptr self, int size);
+void _BestFitAlloc(Managerptr self, int size);
