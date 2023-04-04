@@ -1,9 +1,6 @@
+
 #include <stdio.h>
 #include "../headers/manager.h"
-
-// Custsom Function Declarations
-
-
 
 /*********************/
 /*     CONSTRUCTOR   */
@@ -120,7 +117,11 @@ void Manager_free(Managerptr self, int address)
     {
         List_valueSort(self->busy_list);
     }
-    Manager_coalesce(self);
+    int len = self->free_list->len;
+    for(int i = 0; i < len; i++)
+    {
+        Manager_coalesce(self);
+    }
 
     // Debug Stuff -- Will delete later
     Manager_printLists(self);
