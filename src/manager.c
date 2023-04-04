@@ -237,9 +237,15 @@ void Manager_coalesce(Managerptr self)
             index++;
         }
     }
+
+    // Catches for edge cases -- Specifically with free list sorting & coalescing into 1 final chunk from 2 seperate chunks
     if(self->free_list->len >= 2)
     {
         List_valueSort(self->free_list);
+    }
+    if( (self->free_list->len == 2) & (self->free_list->head->size == self->total_size))
+    {
+        List_removeAt(self->free_list, 1);
     }
 }
 

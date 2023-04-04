@@ -1,0 +1,8 @@
+# -= MEMORY MANAGER CONFIG -= #
+# Please keep this file format, but only change the value after "SIZE: " and "TYPE: " 
+# For these values, keep the space between the ':' and the value
+
+# For SIZE, put in the size of the mock memory manager
+SIZE: 3000
+# For TYPE, use 0 for FIRST-FIT and 1 for BEST-FIT
+TYPE: 0
