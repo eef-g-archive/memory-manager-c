@@ -63,8 +63,8 @@ void Manager_allocate(Managerptr self, int size)
             (i.e. At the beginning, val=0, then next allocation, val=free_list->head->val)
         2. Make sure that the node's size = process size
     */
-   switch(self->mode)
-   {
+    switch(self->mode)
+    {
         case FIRST:
         {
             _FirstFitAlloc(self, size);
@@ -83,7 +83,7 @@ void Manager_allocate(Managerptr self, int size)
         // Sort the two lists by value to arrange them by the fake memory addresses
         List_valueSort(self->free_list);
         List_valueSort(self->busy_list);
-   }
+    }
     // Debug Stuff -- Will delete later
     Manager_printLists(self);
 }
@@ -94,7 +94,6 @@ void Manager_allocate(Managerptr self, int size)
 void Manager_free(Managerptr self, int address)
 {
     printf("\n\n~~~~~~~~~~\nFreeing\n~~~~~~~~~~\n");
-    Nodeptr freed_block = NULL;
     Nodeptr curr = self->busy_list->head;
     int index = 0;
     while(curr != NULL)
@@ -102,23 +101,26 @@ void Manager_free(Managerptr self, int address)
         if(curr->val == address)
         {
             printf("Found the block to free\n");
-            freed_block = curr;
             break;
         }
         curr = curr->next;
         index ++;
     }
 
-
-    if(freed_block == NULL) { return; }
-    int new_value = freed_block->val;
+    if(curr == NULL) { return; }
+    int new_value = curr->val;
     List_addValue(self->free_list, new_value, INT);
-    self->free_list->tail->size = freed_block->size;
+    self->free_list->tail->size = curr->size;
     List_removeAt(self->busy_list, index);
-    List_valueSort(self->free_list);
+    if(self->free_list->len >= 2)
+    {
+        List_valueSort(self->free_list);
+    }
     // This breaks if there are 2 or less items in the busy list
-    List_valueSort(self->busy_list);
-
+    if(self->busy_list->len)
+    {
+        List_valueSort(self->busy_list);
+    }
     Manager_coalesce(self);
 
     // Debug Stuff -- Will delete later
