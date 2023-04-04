@@ -1,17 +1,11 @@
 #include <stdio.h>
 #include "../headers/manager.h"
-// Things to keep track of with the memory manager:
-/*
-    1. We need to manually manipulate the size of the nodes
-    2. The 'val' for the nodes is being used for their location in memory
-    3. The 'size' for the nodes is being used to keep track of the size of the item in memory
-*/
-
 
 /*********************/
 /*     CONSTRUCTOR   */
 /*      FUNCTIONS    */
 /*********************/
+
 
 // Function to create a new manager object
 // size: the total amount of memory to manage
@@ -40,7 +34,6 @@ void Manager_init(Managerptr self, int size, fitType mode)
     self->free_list = List_new();
     self->total_size = size;
 }
-
 
 
 /*********************/
@@ -100,7 +93,6 @@ void Manager_free(Managerptr self, int address)
     {
         if(curr->val == address)
         {
-            printf("Found the block to free\n");
             break;
         }
         curr = curr->next;
@@ -112,12 +104,15 @@ void Manager_free(Managerptr self, int address)
     List_addValue(self->free_list, new_value, INT);
     self->free_list->tail->size = curr->size;
     List_removeAt(self->busy_list, index);
-    if(self->free_list->len >= 2)
+
+    // ONLY sort list if there are more than 2 nodes
+    if(self->free_list->len > 2)
     {
         List_valueSort(self->free_list);
     }
-    // This breaks if there are 2 or less items in the busy list
-    if(self->busy_list->len)
+
+    // ONLY sort list if there are more than 2 nodes
+    if(self->busy_list->len > 2)
     {
         List_valueSort(self->busy_list);
     }
@@ -215,80 +210,33 @@ void _BestFitAlloc(Managerptr self, int size)
 // self: the manager object to use
 void Manager_coalesce(Managerptr self)
 {
-    Nodeptr curr = self->free_list->head;
-    Nodeptr next = curr->next;
-    int index = 0;
-    while(next != NULL)
+    int length = self->free_list->len;
+    for(int i = 0; i < length; i++)
     {
-        if(curr->val + curr->size == next->val)
+        Nodeptr curr = self->free_list->head;
+        Nodeptr next = curr->next;
+        int index = 0;
+        while(next != NULL)
         {
-            curr->size += next->size;
-            List_removeAt(self->free_list, index+1);
-            next = curr->next;
+            if(curr->val + curr->size == next->val)
+            {
+                curr->size += next->size;
+                List_removeAt(self->free_list, index+1);
+                next = curr->next;
+            }
+            else
+            {
+                curr = next;
+                next = curr->next;
+            }
+            index++;
         }
-        else
-        {
-            curr = next;
-            next = curr->next;
-        }
-        index++;
+    }
+    if(self->free_list->len >= 2)
+    {
+        List_valueSort(self->free_list);
     }
 }
-
-
-// void Manager_coalesce(Managerptr self)
-// {
-//     // How to coalesce:
-//     /*
-//         1. Check to see if there are multiple free blocks next to eachother, and smush them together
-//         2. Only smush blocks next to eachother until you hit a busy block. Once you hit a busy block, then you cannot smush any further!
-//         3. So, check each free block and see if they start right after the current block and then combine them. If there is a gap between blocks, ignore coalescing.
-//         (i.e. We have five free list nodes with addresses from 0-150, 150-2000, 2000-2500, 4000-4040, 4050-5000 as well as busy list nodes from 2500-4000 and 4040-4050.
-//         We want to combine the first 3 free blocks to make a new free block from 0-2500, but cannot combine the new large block with either of the 2 remaining free blocks.
-//         This is because we hit a busy block and there are no free blocks right next to eachother.)
-//     */
-//    //Goal is to make a loop that cycles through the manager until it hits a block thats being used
-//     // make a list and push start and end index to it? then when re organizing, you can use the numbers for the addition/subtraction
-//     Nodeptr curr = self->free_list->head;
-//     int prev_size = curr->size;
-//     int prev_address = curr->val;
-//     int curr_size = curr->size;
-//     int i = 0;
-//     int is_combined = 0; // Treat this like a bool, please
-
-//     while(is_combined == 0)
-//     {
-//         // Reset to be at the beginning
-//         i = 0;
-//         curr = self->free_list->head;
-//         prev_size = curr->size;
-//         prev_address = curr->val;
-
-//         while(i < self->free_list->len)
-//         {
-//             //get block length, start, finish
-//             if(prev_address + prev_size == curr->val)
-//             {
-//                 printf("New starting address: %d\nNew node size: %d\nCurrent index: %d",prev_address, prev_size + curr->size, i);
-//                 curr_size = curr->size;
-//                 List_removeAt(self->free_list, i - 1);
-//                 List_addValue(self->free_list, prev_address, INT);
-//                 self->free_list->tail->size = prev_size + curr_size;
-//                 List_valueSort(self->free_list);
-//                 // Flag for combination
-//                 break;
-//             }
-//             //next block
-//             i++;
-//             curr = curr->next; // not sure why this doesnt work, considering the free list is a listptr
-//             if(curr == NULL)
-//             {
-//                 is_combined = 1;
-//             }
-//         }
-//     }
-
-// }
 
 /*********************/
 /*  OUTPUT & DESTROY */
