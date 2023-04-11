@@ -1,0 +1,10 @@
+
+This program is a memory manager program that manages memory allocation and deallocation. 
+It uses a linked list to keep track of the free memory blocks and the busy memory blocks. 
+The program has two modes of operation: first fit and best fit. 
+In first fit mode, the program searches for the first free block of memory that is large enough to hold the requested size. 
+In best fit mode, the program searches for the smallest free block of memory that is large enough to hold the requested size. 
+The program has three main functions: Manager_new, Manager_init, and Manager_allocate.
+Manager_new creates a new manager object with a specified size and mode. 
+Manager_init initializes an existing manager object with a specified size and mode. 
+Manager_allocate allocates a new block of memory with a specified size.
