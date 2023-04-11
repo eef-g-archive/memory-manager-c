@@ -10,4 +10,11 @@ Manager_new creates a new manager object with a specified size and mode.
 Manager_init initializes an existing manager object with a specified size and mode. 
 Manager_allocate allocates a new block of memory with a specified size.
 
-- 
+- manager_test.c
+
+This is a test file for the memory manager program that tests the Manager functions. 
+The program creates a new manager object with a specified size and mode using the Manager_new function. 
+The program then tests the Manager_allocate function by allocating three blocks of memory with specified sizes. 
+The program then tests the Manager_free function by freeing three blocks of memory with specified addresses. 
+Finally, the program purposely fails to allocate memory using the Manager_allocate function.
+
