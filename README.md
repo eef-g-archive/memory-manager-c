@@ -2,7 +2,7 @@
 
 This repository contains a memory manager implementation that provides an interface for allocating and deallocating memory blocks.
 
-## Files
+## Main Files
 
 - manager_test.c
 - manager.h
@@ -25,9 +25,6 @@ This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md
 ## dslib
 
 `dslib` is a library of data structures that are used by the memory manager implementation.
-
-## Difference between dslib.c and dslib.h
-
 `dslib.c` contains the implementation of the data structures while `dslib.h` contains the declarations.
 
 ## Examples
