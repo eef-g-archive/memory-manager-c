@@ -5,10 +5,10 @@ This repository contains a memory manager implementation that provides an interf
 ## Main Files
 
 - manager_test.c
+- manager.c
 - manager.h
 - dslib.c
 - dslib.h
-- manager.c
 
 ## Purpose
 
