@@ -17,6 +17,11 @@ int main()
     Manager_free(test_man, 500);
     printf("Press enter to continue...");
     getchar();
-    printf("\n\n\n\n\n\nPurposely Failed Allocation tests\n");
+    printf("\n\n\n\nPurposely Failed Allocation test\n");
+    Manager_allocate(test_man, 5000000);
+    printf("Press enter to continue...");
+    getchar();
+    printf("\n\n\n\nPurposely failed Free test\n");
+    Manager_free(test_man, 5000000);
     
 }

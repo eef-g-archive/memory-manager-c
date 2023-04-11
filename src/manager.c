@@ -48,9 +48,19 @@ void Manager_init(Managerptr self, int size, fitType mode)
 // size: the size of the block to allocate
 void Manager_allocate(Managerptr self, int size)
 {
-
+    int curr_size = 0;
+    Nodeptr curr = self->free_list->head;
+    while(curr != NULL)
+    {
+        curr_size += curr->size;
+        curr = curr->next;
+    }
+    if(size > curr_size)
+    {
+        printf("Not enough memory to allocate %d bytes. Try again.\n", size);
+        return;
+    }
     printf("\n\n~~~~~~~~~~\nAllocating\n~~~~~~~~~~\n");
-
     // When allocating node, do the following:
     /*
         1. Make sure that the node's val is = the process's location in memory
@@ -87,7 +97,6 @@ void Manager_allocate(Managerptr self, int size)
 // address: the address of the block to free
 void Manager_free(Managerptr self, int address)
 {
-    printf("\n\n~~~~~~~~~~\nFreeing\n~~~~~~~~~~\n");
     Nodeptr curr = self->busy_list->head;
     int index = 0;
     while(curr != NULL)
@@ -100,7 +109,13 @@ void Manager_free(Managerptr self, int address)
         index ++;
     }
 
-    if(curr == NULL) { return; }
+    if(curr == NULL)
+    {
+        printf("No process found at address %d. Try again.\n", address);
+        return; 
+    }
+
+    printf("\n\n~~~~~~~~~~\nFreeing\n~~~~~~~~~~\n");
     int new_value = curr->val;
     List_addValue(self->free_list, new_value, INT);
     self->free_list->tail->size = curr->size;
