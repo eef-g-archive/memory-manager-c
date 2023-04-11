@@ -12,8 +12,6 @@ The purpose of this memory manager implementation is to efficiently manage memor
 - manager_test.c
 - manager.c
 - manager.h
-- dslib.c
-- dslib.h
 
 ## Usage
 
