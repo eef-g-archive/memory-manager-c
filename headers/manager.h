@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include "../include/dslib.h"
+#include "../include/libds.h"
 
 typedef enum {FIRST, BEST} fitType;
 
